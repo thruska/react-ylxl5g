@@ -19,21 +19,32 @@ export class Filtering extends SampleBase {
   state = { logs: [] };
 
   onActionBegin = args => {
-    if (args.requestType == "filtering") {
-      const columns = args.columns.map(predicate => predicate.properties.field);
-      // Here I have the info about the filtered columns
-      this.setState({
-        logs: [
-          ...this.state.logs,
-          "Action 'filtering' triggered " + JSON.stringify(columns)
-        ]
-      });
-    }
+    this.setState(
+      {
+        logs: [...this.state.logs, "Action begin: " + args.requestType]
+      },
+      () => {
+        if (args.requestType == "filtering") {
+          const columns = args.columns
+            ? args.columns.map(predicate => predicate.properties.field)
+            : [];
+          // Here I have the info about the filtered columns
+          this.setState({
+            logs: [
+              ...this.state.logs,
+              "Action 'filtering' triggered " + JSON.stringify(columns)
+            ]
+          });
+        }
+      }
+    );
   };
 
   onDataBind = () => {
     const filterInfo = this.gridInstance.getFilterUIInfo();
     // Here I DON'T have the info about the filtered columns
+    // The filterModule.actualPredicate property contains exactly what I need, but it's PRIVATE in Typescript:
+    // this.gridInstance.filterModule.actualPredicate
     this.setState({
       logs: [
         ...this.state.logs,
